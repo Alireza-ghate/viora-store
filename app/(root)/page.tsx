@@ -1,5 +1,7 @@
-import { Button } from "@/components/ui/button";
+import ProductList from "@/components/shared/product/product-list";
+import sampleData from "@/db/sample-data";
 import type { Metadata } from "next";
+
 export const metadata: Metadata = {
   title: "Home",
 };
@@ -12,8 +14,7 @@ function HomePage() {
   // await delay(2000);
   return (
     <>
-      <h1 className="flex-center">Home</h1>
-      <Button variant={"default"}>my button</Button>
+      <ProductList data={sampleData.products} title="Newest Arrival" />
     </>
   );
 }

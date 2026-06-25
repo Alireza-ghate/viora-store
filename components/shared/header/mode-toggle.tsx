@@ -30,6 +30,7 @@ function ModeToggle() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
+          size={"icon"}
           className="focus-visible:ring-0 focus-visible:ring-offset-0"
           variant={"ghost"}
         >
