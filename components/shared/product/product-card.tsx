@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import Image from "next/image";
 import Link from "next/link";
+import ProductPrice from "./product-price";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function ProductCard({ product }: any) {
@@ -25,7 +26,7 @@ function ProductCard({ product }: any) {
         <div className="flex-between gap-x-4">
           <p>{product.rating} stars</p>
           {product.stock > 0 ? (
-            <p className="font-bold">${product.price}</p>
+            <ProductPrice value={Number(product.price)} />
           ) : (
             <p className="text-destructive">Out of stock</p>
           )}
