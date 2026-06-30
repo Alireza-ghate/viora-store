@@ -1,5 +1,5 @@
 import ProductList from "@/components/shared/product/product-list";
-import sampleData from "@/db/sample-data";
+import { getLatestProducts } from "@/lib/actions/product-actions";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -10,11 +10,12 @@ export const metadata: Metadata = {
 //   return new Promise((resolve) => setTimeout(resolve, ms));
 // }
 
-function HomePage() {
+async function HomePage() {
   // await delay(2000);
+  const latestProducts = await getLatestProducts();
   return (
     <>
-      <ProductList data={sampleData.products} title="Newest Arrival" />
+      <ProductList data={latestProducts} title="Newest Arrival" />
     </>
   );
 }

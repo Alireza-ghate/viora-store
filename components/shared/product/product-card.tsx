@@ -2,9 +2,13 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import Image from "next/image";
 import Link from "next/link";
 import ProductPrice from "./product-price";
+import { Product } from "@/types";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function ProductCard({ product }: any) {
+type ProductCardProps = {
+  product: Product;
+};
+
+function ProductCard({ product }: ProductCardProps) {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader className="p-0 items-center">
