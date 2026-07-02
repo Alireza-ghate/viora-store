@@ -13,3 +13,11 @@ export async function getLatestProducts() {
 
   return convertToPlainObject(data); // this data is a prisma object we have to convert it to javascript object
 }
+
+// get single product by its slug
+
+export async function getSingleProduct(slug: string) {
+  return await prisma.product.findFirst({
+    where: { slug: slug },
+  });
+}
