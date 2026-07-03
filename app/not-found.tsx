@@ -16,7 +16,7 @@ function NotFoundPage() {
         height={48}
         priority
       />
-      <div className="shadow-md p-6 rounded-lg w-1/3 text-center">
+      <div className="shadow-md sm:text-2xl sm:p-6 rounded-lg w-1/3 text-center min-w-80 text-sm p-2">
         <h1 className="text-3xl font-bold mb-4">404 Not Found</h1>
         <p className="text-destructive">Could not found requested page</p>
         <NotFoundButton />
