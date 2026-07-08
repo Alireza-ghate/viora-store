@@ -1,5 +1,5 @@
 import ProductList from "@/components/shared/product/product-list";
-import { getLatestProducts } from "@/lib/actions/product-actions";
+import { getLatestProductsAction } from "@/lib/actions/product-actions";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 async function HomePage() {
   // await delay(2000);
-  const latestProducts = await getLatestProducts();
+  const latestProducts = await getLatestProductsAction();
   return (
     <>
       <ProductList data={latestProducts} title="Newest Arrival" />

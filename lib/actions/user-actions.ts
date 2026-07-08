@@ -5,7 +5,7 @@ import { signInFormSchema } from "../validators";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 
 // sign in user with credentials
-export async function signInWithCredentials(
+export async function signInWithCredentialsAction(
   prevState: unknown,
   formData: FormData,
 ) {
@@ -19,17 +19,17 @@ export async function signInWithCredentials(
 
     await signIn("credentials", user);
 
-    return { success: true, message: "Signed in successfully" };
+    return { success: true, message: "Signed in successfully" }; // its an action state
   } catch (error) {
     if (isRedirectError(error)) {
       throw error;
     }
 
-    return { success: false, message: "Invalid email or password" };
+    return { success: false, message: "Invalid email or password" }; // its an action state
   }
 }
 
 // Sign out the user
-export async function signOutUser() {
+export async function signOutUserAction() {
   await signOut();
 }
