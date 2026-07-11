@@ -16,3 +16,21 @@ export function formatNumberWithDecimal(value: number): string {
 
   return decimal ? `${int}.${decimal.padEnd(2, "0")}` : `${int}.00`;
 }
+
+// FORMAT ERRORS
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function formatError(error: any) {
+  if (error.name === "ZodError") {
+    // handle zod error
+    const fieldErrors = Object.keys(error.issues).map(
+      (field) => error.issues[field].message,
+    );
+
+    return fieldErrors.join(", ");
+  } else {
+    // handle other errors
+    return typeof error.message === "string"
+      ? error.message
+      : JSON.stringify(error.message);
+  }
+}
