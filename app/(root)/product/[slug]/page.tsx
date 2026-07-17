@@ -1,7 +1,7 @@
+import AddToCart from "@/components/shared/product/add-to-cart";
 import ProductImages from "@/components/shared/product/product-images";
 import ProductPrice from "@/components/shared/product/product-price";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getSingleProductAction } from "@/lib/actions/product-actions";
 import { Metadata } from "next";
@@ -77,7 +77,16 @@ async function ProductDetailsPage({ params }: ProductDetailsPageProps) {
 
                 {singleProduct.stock > 0 && (
                   <div className="flex-center">
-                    <Button className="w-full">Add To Cart</Button>
+                    <AddToCart
+                      item={{
+                        productId: singleProduct.id,
+                        name: singleProduct.name,
+                        slug: singleProduct.slug,
+                        qty: 1,
+                        image: singleProduct.images![0],
+                        price: singleProduct.price,
+                      }}
+                    />
                   </div>
                 )}
               </CardContent>

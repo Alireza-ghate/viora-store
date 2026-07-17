@@ -4,6 +4,7 @@ import { compareSync } from "bcrypt-ts-edge";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import type { NextAuthConfig } from "next-auth";
+import { NextResponse } from "next/server";
 
 export const config = {
   pages: {
@@ -62,8 +63,6 @@ export const config = {
       session.user.role = token.role;
       session.user.name = token.name;
 
-      console.log(token);
-
       // if there is an update
       if (trigger === "update") {
         session.user.name = user.name;
@@ -71,7 +70,7 @@ export const config = {
       return session;
     },
 
-    async jwt({ token, user, session, trigger }) {
+    async jwt({ token, user }) {
       // assign user fields to token (like role property in user to token obj)
       // first check user exists
       if (user) {
@@ -90,6 +89,30 @@ export const config = {
       }
 
       return token;
+    },
+
+    authorized({ request, auth }) {
+      // check for session cart cookie
+      if (!request.cookies.get("sessionCartId")) {
+        // if there is no cookie named sessionCartId, just create it
+        const sessionCartId = crypto.randomUUID();
+
+        // clone the req headers
+        const newRequestHeaders = new Headers(request.headers);
+        // create new respone and add new headers
+        const respone = NextResponse.next({
+          request: {
+            headers: newRequestHeaders,
+          },
+        });
+
+        // set newly generated sessionCartId in the response cookie
+        respone.cookies.set("sessionCartId", sessionCartId);
+
+        return respone;
+      } else {
+        return true;
+      }
     },
   },
 } satisfies NextAuthConfig;
