@@ -3,6 +3,7 @@ import ProductImages from "@/components/shared/product/product-images";
 import ProductPrice from "@/components/shared/product/product-price";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { getMyCart } from "@/lib/actions/cart-action";
 import { getSingleProductAction } from "@/lib/actions/product-actions";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -21,6 +22,8 @@ async function ProductDetailsPage({ params }: ProductDetailsPageProps) {
   const singleProduct = await getSingleProductAction(slug);
 
   if (!singleProduct) notFound(); // if there is no data send user to notFound page
+
+  const cart = await getMyCart();
 
   return (
     <>
@@ -78,6 +81,7 @@ async function ProductDetailsPage({ params }: ProductDetailsPageProps) {
                 {singleProduct.stock > 0 && (
                   <div className="flex-center">
                     <AddToCart
+                      cart={cart}
                       item={{
                         productId: singleProduct.id,
                         name: singleProduct.name,

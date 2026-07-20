@@ -27,6 +27,30 @@ const calcPrice = (items: CartItem[]) => {
   };
 };
 
+export async function getMyCart() {
+  const sessionCartId = (await cookies()).get("sessionCartId")?.value;
+  if (!sessionCartId) throw new Error("Cart session not found");
+  const session = await auth();
+  const userId = session?.user?.id ? (session?.user?.id as string) : undefined;
+  // get user cart from database by sesssionCartId or userID
+  const cart = await prisma.cart.findFirst({
+    // GET USER CART IF USER ALREADY LOGGED IN BY ITS USERID IF DIDNT LOGGED IN AND ITS A GUEST USER, USER SESSIONCARTID TO GET ITS CART
+    where: userId ? { userId: userId } : { sessionCartId: sessionCartId },
+  });
+
+  if (!cart) return undefined;
+
+  // convert prisma obj to regular plain js obj:
+  return convertToPlainObject({
+    ...cart,
+    items: cart.items as CartItem[],
+    itemsPrice: cart.itemsPrice.toString(),
+    totalPrice: cart.totalPrice.toString(),
+    shippingPrice: cart.shippingPrice.toString(),
+    taxPrice: cart.taxPrice.toString(),
+  });
+}
+
 export async function addToCartAction(data: CartItem) {
   try {
     // check for sessionCartId cookie exists or not
@@ -42,7 +66,7 @@ export async function addToCartAction(data: CartItem) {
       : undefined;
 
     //  get cart
-    const cart = await getMyCartAction();
+    const cart = await getMyCart();
 
     // parse and validate item we got with zod schema for insert items into cart
     const item = cartItemSchema.parse(data);
@@ -124,26 +148,56 @@ export async function addToCartAction(data: CartItem) {
   }
 }
 
-export async function getMyCartAction() {
-  const sessionCartId = (await cookies()).get("sessionCartId")?.value;
-  if (!sessionCartId) throw new Error("Cart session not found");
-  const session = await auth();
-  const userId = session?.user?.id ? (session?.user?.id as string) : undefined;
-  // get user cart from database by sesssionCartId or userID
-  const cart = await prisma.cart.findFirst({
-    // GET USER CART IF USER ALREADY LOGGED IN BY ITS USERID IF DIDNT LOGGED IN AND ITS A GUEST USER, USER SESSIONCARTID TO GET ITS CART
-    where: userId ? { userId: userId } : { sessionCartId: sessionCartId },
-  });
+export async function removeItemFromCartAction(productId: string) {
+  try {
+    // Check for cart cookie
+    const sessionCartId = (await cookies()).get("sessionCartId")?.value;
+    if (!sessionCartId) throw new Error("Cart session not found");
 
-  if (!cart) return undefined;
+    // Get Product
+    const product = await prisma.product.findFirst({
+      where: { id: productId },
+    });
+    if (!product) throw new Error("Product not found");
 
-  // convert prisma obj to regular plain js obj:
-  return convertToPlainObject({
-    ...cart,
-    items: cart.items as CartItem[],
-    itemsPrice: cart.itemsPrice.toString(),
-    totalPrice: cart.totalPrice.toString(),
-    shippingPrice: cart.shippingPrice.toString(),
-    taxPrice: cart.taxPrice.toString(),
-  });
+    // Get user cart
+    const cart = await getMyCart();
+    if (!cart) throw new Error("Cart not found");
+
+    // Check for item
+    const exist = (cart.items as CartItem[]).find(
+      (x) => x.productId === productId,
+    );
+    if (!exist) throw new Error("Item not found");
+
+    // Check if only one in qty
+    if (exist.qty === 1) {
+      // Remove from cart
+      cart.items = (cart.items as CartItem[]).filter(
+        (x) => x.productId !== exist.productId,
+      );
+    } else {
+      // Decrease qty
+      (cart.items as CartItem[]).find((x) => x.productId === productId)!.qty =
+        exist.qty - 1;
+    }
+
+    // Update cart in database
+    await prisma.cart.update({
+      where: { id: cart.id },
+      data: {
+        items: cart.items as Prisma.CartUpdateitemsInput[],
+        ...calcPrice(cart.items as CartItem[]),
+      },
+    });
+
+    revalidatePath(`/product/${product.slug}`);
+
+    return {
+      success: true,
+      message: `${product.name} was removed from cart`,
+    };
+  } catch (error) {
+    return { success: false, message: formatError(error) };
+  }
 }
