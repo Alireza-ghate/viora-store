@@ -1,11 +1,16 @@
 "use server";
 
-import { signIn, signOut } from "@/auth";
-import { signInFormSchema, signUpFormSchema } from "../validators";
+import { auth, signIn, signOut } from "@/auth";
+import {
+  shippingAddressSchema,
+  signInFormSchema,
+  signUpFormSchema,
+} from "../validators";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { hashSync } from "bcrypt-ts-edge";
 import { prisma } from "@/db/prisma";
 import { formatError } from "../utils";
+import { ShippingAddress } from "@/types";
 
 // sign in user with credentials
 export async function signInWithCredentialsAction(
@@ -99,5 +104,43 @@ export async function signUpUserWithCredentialsAction(
     }
 
     return { success: false, message: formatError(error) };
+  }
+}
+
+// get user by its ID
+export async function getUserByID(userId: string) {
+  const user = await prisma.user.findFirst({
+    where: { id: userId },
+  });
+
+  if (!user) throw new Error("user not found");
+
+  return user;
+}
+
+//  Update user's address
+export async function updateUserAddress(data: ShippingAddress) {
+  try {
+    const session = await auth();
+    // get current logged in user
+    const currentUser = await prisma.user.findFirst({
+      where: { id: session?.user?.id },
+    });
+
+    if (!currentUser) throw new Error("User not found");
+    // validate input data with schema
+    const address = shippingAddressSchema.parse(data);
+    // update user's address in database
+    await prisma.user.update({
+      where: { id: currentUser.id }, // only the current logged in user's address want to be update
+      data: { address: address }, // only update address property of user obj
+    });
+
+    return { seccess: true, message: "Informations successfully recieved" };
+  } catch (error) {
+    return {
+      success: false,
+      message: formatError(error),
+    };
   }
 }
