@@ -42,7 +42,7 @@ function ShippingAddressForm({ address }: ShippingAddressFormProps) {
         toast.error(res.message);
       }
 
-      router.push("/checkout");
+      router.push("/payment-method");
     });
   };
   return (
