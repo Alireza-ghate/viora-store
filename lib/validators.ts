@@ -86,3 +86,24 @@ export const paymentMethodSchema = z
     path: ["type"],
     error: "Invalid payment method",
   }); // to make sure user can only select on of payment methods provided in array
+
+// schema for insert order
+export const insertOrderSchema = z.object({
+  userId: z.string().min(1, "User is required"),
+  itemsPrice: currency,
+  shippingPrice: currency,
+  taxPrice: currency,
+  totalPrice: currency,
+  paymentMethod: z.string().refine((data) => PAYMENT_METHODS.includes(data)),
+  shippingAddress: shippingAddressSchema,
+});
+
+// shcema for inserting an order item
+export const insertOrderItemSchema = z.object({
+  productId: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  image: z.string(),
+  qty: z.number(),
+  price: currency,
+});

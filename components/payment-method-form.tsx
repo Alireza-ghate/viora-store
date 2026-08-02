@@ -11,9 +11,7 @@ import { Button } from "./ui/button";
 import Spinner from "./shared/spinner";
 import { ArrowRight } from "lucide-react";
 import { Field, FieldError, FieldLabel } from "./ui/field";
-import { Input } from "./ui/input";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
-import { Label } from "./ui/label";
 import { updateUserPaymentMethodAction } from "@/lib/actions/user-actions";
 import { toast } from "sonner";
 
@@ -33,7 +31,6 @@ function PaymentMethodForm({ preferredPaymentMethod }: PaymentMethodFormProps) {
   });
 
   async function onSubmit(data: z.infer<typeof paymentMethodSchema>) {
-    console.log(data.type);
     startTransition(async () => {
       const res = await updateUserPaymentMethodAction(data);
 
