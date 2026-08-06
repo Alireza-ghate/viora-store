@@ -68,11 +68,10 @@ export const insertCartSchema = z.object({
 
 export const shippingAddressSchema = z.object({
   fullName: z.string().min(3, "Name must be at least 3 characters"),
-  streetAddress: z.string().min(10, "Address must be at least 10 characters"),
-  city: z.string().min(3, "Address must be at least 3 characters"),
+  streetAddress: z.string().min(3, "Address must be at least 3 characters"),
+  city: z.string().min(3, "City must be at least 3 characters"),
   postalCode: z.string().min(3, "Postal code must be at least 3 characters"),
   country: z.string().min(3, "Country must be at least 3 characters"),
-  // when we add map
   lat: z.number().optional(),
   lng: z.number().optional(),
 });
@@ -87,23 +86,25 @@ export const paymentMethodSchema = z
     error: "Invalid payment method",
   }); // to make sure user can only select on of payment methods provided in array
 
-// schema for insert order
+// Schema for inserting order
 export const insertOrderSchema = z.object({
   userId: z.string().min(1, "User is required"),
   itemsPrice: currency,
   shippingPrice: currency,
   taxPrice: currency,
   totalPrice: currency,
-  paymentMethod: z.string().refine((data) => PAYMENT_METHODS.includes(data)),
+  paymentMethod: z.string().refine((data) => PAYMENT_METHODS.includes(data), {
+    message: "Invalid payment method",
+  }),
   shippingAddress: shippingAddressSchema,
 });
 
-// shcema for inserting an order item
+// Schema for inserting an order item
 export const insertOrderItemSchema = z.object({
   productId: z.string(),
-  name: z.string(),
   slug: z.string(),
   image: z.string(),
-  qty: z.number(),
+  name: z.string(),
   price: currency,
+  qty: z.number(),
 });

@@ -194,7 +194,7 @@ export async function getOrderByID(orderId: string) {
   const data = await prisma.order.findFirst({
     where: { id: orderId },
     include: {
-      OrderItems: true, // also get OrderItems field
+      orderItems: true, // also get orderItems field
       user: {
         select: {
           name: true,
