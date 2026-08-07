@@ -33,7 +33,7 @@ async function UserButton() {
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col gap-y-1">
+              <div className="flex flex-col gap-y-2 mb-2">
                 <div className="text-sm leading-none font-medium">
                   {session?.user?.name}
                 </div>
@@ -42,6 +42,16 @@ async function UserButton() {
                 </div>
               </div>
             </DropdownMenuLabel>
+            <DropdownMenuItem>
+              <Link className="w-full" href="/user/profile">
+                User Profile
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link className="w-full" href="/user/orders">
+                Order History
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem className="p-0 mb-1">
               <form action={signOutUserAction} className="w-full">
                 <Button
