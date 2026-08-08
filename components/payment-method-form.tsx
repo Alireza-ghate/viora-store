@@ -21,7 +21,6 @@ interface PaymentMethodFormProps {
 
 function PaymentMethodForm({ preferredPaymentMethod }: PaymentMethodFormProps) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
 
   const form = useForm<z.infer<typeof paymentMethodSchema>>({
     resolver: zodResolver(paymentMethodSchema),
@@ -31,16 +30,14 @@ function PaymentMethodForm({ preferredPaymentMethod }: PaymentMethodFormProps) {
   });
 
   async function onSubmit(data: z.infer<typeof paymentMethodSchema>) {
-    startTransition(async () => {
-      const res = await updateUserPaymentMethodAction(data);
+    const res = await updateUserPaymentMethodAction(data);
 
-      if (!res.success) {
-        toast.error(res.message);
-        return;
-      }
+    if (!res.success) {
+      toast.error(res.message);
+      return;
+    }
 
-      router.push("/place-order");
-    });
+    router.push("/place-order");
   }
 
   return (
@@ -72,7 +69,7 @@ function PaymentMethodForm({ preferredPaymentMethod }: PaymentMethodFormProps) {
                       checked={field.value === paymentOpt}
                       value={paymentOpt}
                       id={paymentOpt}
-                      disabled={isPending}
+                      disabled={form.formState.isSubmitting}
                     />
                     <FieldLabel htmlFor={paymentOpt} className="font-normal">
                       {paymentOpt}
@@ -89,11 +86,15 @@ function PaymentMethodForm({ preferredPaymentMethod }: PaymentMethodFormProps) {
           <div className="flex gap-2">
             <Button
               className="w-full"
-              disabled={isPending}
+              disabled={form.formState.isSubmitting}
               size={"lg"}
               type="submit"
             >
-              {isPending ? <Spinner /> : <ArrowRight className="w-4 h-4" />}{" "}
+              {form.formState.isSubmitting ? (
+                <Spinner />
+              ) : (
+                <ArrowRight className="w-4 h-4" />
+              )}{" "}
               Continue
             </Button>
           </div>

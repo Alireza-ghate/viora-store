@@ -183,3 +183,28 @@ export async function updateUserPaymentMethodAction(
     };
   }
 }
+
+//  update user profile
+export async function updateUserProfile(user: { name: string; email: string }) {
+  try {
+    const session = await auth();
+    const userId = session?.user?.id;
+
+    // get current user first
+    const currentUser = await prisma.user.findFirst({
+      where: { id: userId },
+    });
+
+    if (!currentUser) throw new Error("User not found");
+
+    // then update user
+    await prisma.user.update({
+      where: { id: currentUser.id },
+      data: { name: user?.name, email: user?.email },
+    });
+
+    return { success: true, message: "User successfully updated" };
+  } catch (error) {
+    return { success: false, message: formatError(error) };
+  }
+}

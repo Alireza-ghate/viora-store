@@ -1,6 +1,6 @@
 import z from "zod";
-import { formatNumberWithDecimal } from "./utils";
 import { PAYMENT_METHODS } from "./constants";
+import { formatNumberWithDecimal } from "./utils";
 
 const currency = z
   .string()
@@ -107,4 +107,10 @@ export const insertOrderItemSchema = z.object({
   name: z.string(),
   price: currency,
   qty: z.number(),
+});
+
+// schema for updating user profile
+export const updateProfileSchema = z.object({
+  email: z.email("Invalid email address"),
+  name: z.string().min(3, "Name must be at least 3 characters"),
 });

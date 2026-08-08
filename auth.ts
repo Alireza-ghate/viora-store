@@ -71,7 +71,7 @@ export const config = {
       return session;
     },
 
-    async jwt({ token, user, trigger }) {
+    async jwt({ token, user, trigger, session }) {
       // assign user fields to token (like role property in user to token obj)
       // first check user exists
       if (user) {
@@ -115,6 +115,11 @@ export const config = {
             }
           }
         }
+      }
+
+      // handle session updates
+      if (session?.user.name && trigger === "update") {
+        token.name = session.user.name;
       }
 
       return token;

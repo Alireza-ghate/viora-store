@@ -3,6 +3,7 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "../ui/button";
 import qs from "query-string";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface PaginationProps {
   page: number | string;
@@ -55,7 +56,7 @@ function Pagination({ page, totalPages, urlParamName }: PaginationProps) {
         variant="outline"
         size="lg"
       >
-        Previous
+        <ChevronLeft /> Previous
       </Button>
 
       <span className="mx-1 flex items-center justify-center p-1 w-10 border rounded-lg">
@@ -68,7 +69,7 @@ function Pagination({ page, totalPages, urlParamName }: PaginationProps) {
         variant="outline"
         size="lg"
       >
-        Next
+        Next <ChevronRight />
       </Button>
     </div>
   );

@@ -48,7 +48,7 @@ async function OrdersPage({ searchParams }: OrdersPageProps) {
           <TableBody>
             {orders.data.map((order) => (
               <TableRow key={order.id}>
-                <TableCell>{formatId(order.id)}</TableCell>
+                <TableCell className="p-4">{formatId(order.id)}</TableCell>
                 <TableCell>
                   {formatDateTime(order.createdAt).dateTime}
                 </TableCell>
