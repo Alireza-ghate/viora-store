@@ -46,6 +46,7 @@ export function round2(value: number | string) {
   }
 }
 
+// format currency
 const CURRENCY_FORMATTER = new Intl.NumberFormat("en-US", {
   currency: "USD",
   style: "currency",
@@ -60,6 +61,13 @@ export function formatCurrency(amount: number | string | null) {
   } else {
     return "NaN";
   }
+}
+
+// format numbers
+const NUMBER_FORMATTER = new Intl.NumberFormat("en-Us");
+
+export function formatNumber(number: number) {
+  return NUMBER_FORMATTER.format(number);
 }
 
 // shorten UUID
