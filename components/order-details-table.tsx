@@ -14,12 +14,18 @@ import {
 } from "./ui/table";
 import Image from "next/image";
 import Link from "next/link";
+import { Button } from "./ui/button";
+import { useTransition } from "react";
+import { deliverOrder, updateCodOrderToPaid } from "@/lib/actions/order-action";
+import Spinner from "./shared/spinner";
+import { toast } from "sonner";
 
 interface OrderDetailsTableProps {
   order: Order;
+  isAdmin: boolean;
 }
 
-function OrderDetailsTable({ order }: OrderDetailsTableProps) {
+function OrderDetailsTable({ order, isAdmin }: OrderDetailsTableProps) {
   const {
     itemsPrice,
     deliveredAt,
@@ -34,6 +40,30 @@ function OrderDetailsTable({ order }: OrderDetailsTableProps) {
     taxPrice,
     totalPrice,
   } = order;
+  const [isPending, startTransition] = useTransition();
+
+  function handlePaid() {
+    startTransition(async () => {
+      const res = await updateCodOrderToPaid(id);
+      if (res.success) {
+        toast.success(res.message);
+      } else {
+        toast.error(res.message);
+      }
+    });
+  }
+
+  function handleDelivered() {
+    startTransition(async () => {
+      const res = await deliverOrder(id);
+      if (res.success) {
+        toast.success(res.message);
+      } else {
+        toast.error(res.message);
+      }
+    });
+  }
+
   return (
     <>
       <h1 className="py-4 text-2xl">Order {formatId(id)}</h1>
@@ -130,6 +160,22 @@ function OrderDetailsTable({ order }: OrderDetailsTableProps) {
               <div className="flex justify-between">
                 <div>Total</div>
                 <div className="">{formatCurrency(totalPrice)}</div>
+              </div>
+              <div className="flex items-center gap-2">
+                {/* cash on delivery */}
+                {isAdmin && !isPaid && paymentMethod === "CashOnDelivery" && (
+                  <Button disabled={isPending} onClick={handlePaid}>
+                    Mark As Paid {isPending && <Spinner />}
+                  </Button>
+                )}
+                {isAdmin &&
+                  isPaid &&
+                  !isDelivered &&
+                  paymentMethod === "CashOnDelivery" && (
+                    <Button disabled={isPending} onClick={handleDelivered}>
+                      Mark As Delivered {isPending && <Spinner />}
+                    </Button>
+                  )}
               </div>
             </CardContent>
           </Card>

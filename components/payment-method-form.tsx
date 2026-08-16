@@ -1,19 +1,18 @@
 "use client";
 
+import { updateUserPaymentMethodAction } from "@/lib/actions/user-actions";
 import { DEFAULT_PAYMENT_METHOD, PAYMENT_METHODS } from "@/lib/constants";
 import { paymentMethodSchema } from "@/lib/validators";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { useTransition } from "react";
-import { Controller, useForm } from "react-hook-form";
-import z from "zod";
-import { Button } from "./ui/button";
-import Spinner from "./shared/spinner";
 import { ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import z from "zod";
+import Spinner from "./shared/spinner";
+import { Button } from "./ui/button";
 import { Field, FieldError, FieldLabel } from "./ui/field";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
-import { updateUserPaymentMethodAction } from "@/lib/actions/user-actions";
-import { toast } from "sonner";
 
 interface PaymentMethodFormProps {
   preferredPaymentMethod: string | null;

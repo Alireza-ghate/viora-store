@@ -10,6 +10,7 @@ import { getMyCart } from "./cart-action";
 import { getUserByID } from "./user-actions";
 import { PAGE_SIZE } from "../constants";
 import { Prisma } from "../generated/prisma/client";
+import { revalidatePath } from "next/cache";
 
 // create order and create orderItem
 // export async function createOrderAction() {
@@ -221,7 +222,7 @@ export async function getMyOrders({
 }) {
   // get userId
   const session = await auth();
-  if (!session) throw new Error("User is not autherized");
+  if (!session) throw new Error("User is not authorized");
   const userId = session.user.id;
 
   // get all orders
@@ -266,6 +267,7 @@ export async function getOrderSummary() {
     month: entry.month,
     totalSales: Number(entry.totalSales),
   }));
+
   // get latest sales
   const latestSales = await prisma.order.findMany({
     orderBy: { createdAt: "desc" },
@@ -283,4 +285,89 @@ export async function getOrderSummary() {
     salesData,
     latestSales,
   };
+}
+
+//  get all orders
+export async function getAllOrders({
+  limit = PAGE_SIZE,
+  page,
+}: {
+  limit?: number;
+  page: number;
+}) {
+  const data = await prisma.order.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+    take: limit,
+    skip: (page - 1) * limit,
+    include: {
+      user: { select: { name: true } },
+    },
+  });
+
+  const dataCount = await prisma.order.count();
+  const totalPages = Math.ceil(dataCount / limit);
+
+  return {
+    data,
+    totalPages,
+  };
+}
+
+// delete a single order
+export async function deleteOrder(orderId: string) {
+  try {
+    await prisma.order.delete({
+      where: { id: orderId },
+    });
+
+    // after deletion of order, revalidate the page
+    revalidatePath("/admin/orders");
+
+    return { success: true, message: "Order successfully deleted" };
+  } catch (error) {
+    return { success: false, message: formatError(error) };
+  }
+}
+
+// update cashOnDelivery orders to paid
+export async function updateCodOrderToPaid(orderId: string) {
+  try {
+    await prisma.order.update({
+      where: { id: orderId },
+      data: { isPaid: true },
+    });
+
+    revalidatePath(`/order/${orderId}`);
+
+    return { success: true, message: "Order marked as paid" };
+  } catch (error) {
+    return { success: false, message: formatError(error) };
+  }
+}
+
+// update cashOnDelivery order to delivered
+export async function deliverOrder(orderId: string) {
+  try {
+    // get the order itself
+    const order = await prisma.order.findFirst({
+      where: { id: orderId },
+    });
+
+    if (!order) throw new Error("Order not found");
+    if (!order.isPaid) throw new Error("Order is not paid");
+
+    // then update order
+    await prisma.order.update({
+      where: { id: orderId },
+      data: { isDelivered: true, deliveredAt: new Date() },
+    });
+
+    revalidatePath(`/order/${orderId}`);
+
+    return { success: true, message: "Order marked as delivered" };
+  } catch (error) {
+    return { success: false, message: formatError(error) };
+  }
 }

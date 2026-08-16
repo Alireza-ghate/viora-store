@@ -1,4 +1,3 @@
-import { auth } from "@/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -9,6 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getOrderSummary } from "@/lib/actions/order-action";
+import { requireAdmin } from "@/lib/auth-guard";
 import { formatCurrency, formatDateTime, formatNumber } from "@/lib/utils";
 import { BadgeDollarSign, Barcode, CreditCardIcon, Users } from "lucide-react";
 import { Metadata } from "next";
@@ -29,10 +29,8 @@ async function OverviewPage() {
     totalSales,
   } = await getOrderSummary();
 
-  const session = await auth();
   // show dashboard when user.role is only Admin
-  if (session?.user?.role !== "admin")
-    throw new Error("user is not autherized");
+  await requireAdmin();
 
   return (
     <div className="space-y-4">
