@@ -4,6 +4,8 @@ import { convertToPlainObject, formatError } from "../utils";
 import { LATEST_PRODUCTS_LIMIT, PAGE_SIZE } from "../constants";
 import { prisma } from "@/db/prisma";
 import { revalidatePath } from "next/cache";
+import z from "zod";
+import { insertProductSchema, updateProductSchema } from "../validators";
 
 // get latest products
 export async function getLatestProductsAction() {
@@ -36,6 +38,9 @@ export async function getProducts({
   category,
 }: getProductsProps) {
   const data = await prisma.product.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
     skip: (page - 1) * limit, // when using pagination
     take: limit, // how many data will fetch
   });
@@ -69,6 +74,53 @@ export async function deleteProduct(productId: string) {
     revalidatePath("/admin/products");
 
     return { success: true, message: "Product successfully deleted" };
+  } catch (error) {
+    return { success: false, message: formatError(error) };
+  }
+}
+
+// create product
+export async function createProduct(data: z.infer<typeof insertProductSchema>) {
+  try {
+    // first validate product using zod
+    const product = insertProductSchema.parse(data);
+
+    // after validate, create new product in table
+    await prisma.product.create({
+      data: product,
+    });
+    // after creating new product, revalidate the page
+    revalidatePath("/admin/products");
+
+    return { success: true, message: "Product successfully created" };
+  } catch (error) {
+    return { success: false, message: formatError(error) };
+  }
+}
+
+// update existing product
+export async function updateProduct(data: z.infer<typeof updateProductSchema>) {
+  try {
+    // first validate product using zod
+    const product = updateProductSchema.parse(data);
+
+    // get existing product
+    const existingProduct = await prisma.product.findFirst({
+      where: { id: product.id },
+    });
+
+    if (!existingProduct) throw new Error("Product not found");
+
+    // update product in table
+    await prisma.product.update({
+      where: { id: product.id },
+      data: product,
+    });
+
+    // after creating new product, revalidate the page
+    revalidatePath("/admin/products");
+
+    return { success: true, message: "Product successfully updated" };
   } catch (error) {
     return { success: false, message: formatError(error) };
   }
