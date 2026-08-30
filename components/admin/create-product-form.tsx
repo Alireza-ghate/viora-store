@@ -13,6 +13,9 @@ import slugify from "slugify";
 import { Textarea } from "../ui/textarea";
 import { createProduct } from "@/lib/actions/product-actions";
 import { toast } from "sonner";
+import { Card, CardContent } from "../ui/card";
+import Image from "next/image";
+import { UploadButton } from "@/lib/uploadthing";
 
 type FormInput = z.input<typeof insertProductSchema>;
 type FormOutput = z.output<typeof insertProductSchema>;
@@ -26,7 +29,6 @@ function CreateProductForm() {
   });
 
   async function onSubmit(data: FormOutput) {
-    // Do something with the form values.
     const res = await createProduct(data);
 
     if (res.success) {
@@ -37,6 +39,9 @@ function CreateProductForm() {
 
     router.push("/admin/products");
   }
+
+  const images = form.watch("images");
+
   return (
     <form method="POST" onSubmit={form.handleSubmit(onSubmit)}>
       <div className="flex flex-col gap-5 md:flex-row">
@@ -172,8 +177,44 @@ function CreateProductForm() {
           )}
         />
       </div>
-      <div className="upload-field flex flex-col gap-5 md:flex-row">
+      <div className="upload-field flex flex-col gap-5 mt-5 md:flex-row">
         {/* images */}
+        <Controller
+          name="images"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={field.name}>Images</FieldLabel>
+              <Card>
+                <CardContent className="space-y-2 mt-2 min-h-48">
+                  <div className="flex-start space-x-2">
+                    {images.map((image) => (
+                      <Image
+                        width={100}
+                        height={100}
+                        key={image}
+                        src={image}
+                        alt="product image"
+                        className="w-20 h-20 object-center object-cover rounded-sm"
+                      />
+                    ))}
+                    <UploadButton
+                      endpoint="imageUploader"
+                      onClientUploadComplete={(res: { url: string }[]) => {
+                        form.setValue("images", [...images, res[0].url]);
+                      }}
+                      onUploadError={(error: Error) => {
+                        toast.error(`ERROR!, ${error.message}`);
+                      }}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
       </div>
       <div className="upload-field">{/* isfeatured */}</div>
       <div className="mt-5">
