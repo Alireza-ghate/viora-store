@@ -4,7 +4,7 @@ import ProductPrice from "@/components/shared/product/product-price";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { getMyCart } from "@/lib/actions/cart-action";
-import { getSingleProductAction } from "@/lib/actions/product-actions";
+import { getSingleProductBySlug } from "@/lib/actions/product-actions";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -19,7 +19,7 @@ type ProductDetailsPageProps = {
 
 async function ProductDetailsPage({ params }: ProductDetailsPageProps) {
   const { slug } = await params;
-  const singleProduct = await getSingleProductAction(slug);
+  const singleProduct = await getSingleProductBySlug(slug);
 
   if (!singleProduct) notFound(); // if there is no data send user to notFound page
 

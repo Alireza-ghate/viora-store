@@ -13,6 +13,10 @@ import { Button } from "../ui/button";
 import { Field, FieldError, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
+import { Card, CardContent } from "../ui/card";
+import Image from "next/image";
+import { UploadButton } from "@/lib/uploadthing";
+import { Checkbox } from "../ui/checkbox";
 
 interface UpdateProductFormProps {
   product: Product;
@@ -27,7 +31,7 @@ function UpdateProductForm({ product, productId }: UpdateProductFormProps) {
 
   const form = useForm<FormInput, FormOutput>({
     resolver: zodResolver(updateProductSchema),
-    defaultValues: product,
+    defaultValues: product, // prefill all fileds based on product obj
   });
 
   async function onSubmit(data: FormOutput) {
@@ -43,8 +47,13 @@ function UpdateProductForm({ product, productId }: UpdateProductFormProps) {
 
     router.push("/admin/products");
   }
+
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const images = form.watch("images");
+  const isFeatured = form.watch("isFeatured");
+  const banner = form.watch("banner");
   return (
-    <form method="POST" onSubmit={form.handleSubmit(onSubmit)}>
+    <form onSubmit={form.handleSubmit(onSubmit)}>
       <div className="flex flex-col gap-5 md:flex-row">
         <Controller
           name="name"
@@ -178,10 +187,93 @@ function UpdateProductForm({ product, productId }: UpdateProductFormProps) {
           )}
         />
       </div>
-      <div className="upload-field flex flex-col gap-5 md:flex-row">
+      <div className="upload-field flex flex-col gap-5 mt-5 md:flex-row">
         {/* images */}
+        <Controller
+          name="images"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={field.name}>Images</FieldLabel>
+              <Card>
+                <CardContent className="space-y-2 mt-2 min-h-48">
+                  <div className="flex-start space-x-2">
+                    {images.map((image) => (
+                      <Image
+                        width={100}
+                        height={100}
+                        key={image}
+                        src={image}
+                        alt="product image"
+                        className="w-20 h-20 object-center object-cover rounded-sm"
+                      />
+                    ))}
+                    <UploadButton
+                      endpoint="imageUploader"
+                      onClientUploadComplete={(res: { url: string }[]) => {
+                        form.setValue("images", [...images, res[0].url]);
+                      }}
+                      onUploadError={(error: Error) => {
+                        toast.error(`ERROR!, ${error.message}`);
+                      }}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
       </div>
-      <div className="upload-field">{/* isfeatured */}</div>
+      <div className="upload-field mt-5">
+        {/* isfeatured */}
+        <Controller
+          name="isFeatured"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor={field.name}>Featured Product</FieldLabel>
+              <Card>
+                <CardContent className="space-y-2 mt-2">
+                  <div className="flex gap-4">
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                    <FieldLabel htmlFor={field.name}>isFeatured?</FieldLabel>
+                  </div>
+
+                  {isFeatured && banner && (
+                    <Image
+                      src={banner}
+                      alt="banner image"
+                      className="w-full object-cover object-center rounded-sm"
+                      width={1920}
+                      height={680}
+                    />
+                  )}
+                  {/* check if isFeatured is true and banner is false, then render upload banner */}
+
+                  {isFeatured && !banner && (
+                    <UploadButton
+                      endpoint="imageUploader"
+                      onClientUploadComplete={(res: { url: string }[]) => {
+                        form.setValue("banner", res[0].url);
+                      }}
+                      onUploadError={(error: Error) => {
+                        toast.error(`ERROR!, ${error.message}`);
+                      }}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+      </div>
       <div className="mt-5">
         {/* description */}
         <Controller
@@ -209,7 +301,7 @@ function UpdateProductForm({ product, productId }: UpdateProductFormProps) {
           disabled={form.formState.isSubmitting}
           className="button col-span-2 w-full"
         >
-          {form.formState.isSubmitting ? "Submitting" : "Update Product"}
+          {form.formState.isSubmitting ? "Submitting" : "Create Product"}
         </Button>
       </div>
     </form>

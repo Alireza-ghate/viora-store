@@ -18,10 +18,19 @@ export async function getLatestProductsAction() {
 }
 
 // get single product by its slug
-export async function getSingleProductAction(slug: string) {
+export async function getSingleProductBySlug(slug: string) {
   return await prisma.product.findFirst({
     where: { slug: slug },
   });
+}
+
+// get single product by its ID
+export async function getSingleProductById(id: string) {
+  const data = await prisma.product.findFirst({
+    where: { id: id },
+  });
+
+  return convertToPlainObject(data);
 }
 
 // get all products
